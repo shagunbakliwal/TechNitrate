@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Bootstrap Example</title>
+<title>TechNitrate Solution</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>jQuery Floating Social Share</title>
@@ -17,8 +17,82 @@
 <script type="text/javascript" src="js/floating-share.js"></script>
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
+	<link rel = "stylesheet"
+         href = "https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
+      <script language = "javascript">
+         angular
+            .module('firstApplication', ['ngMaterial'])
+            .controller('autoCompleteController', autoCompleteController);
+
+         function autoCompleteController ($timeout, $q, $log) {
+            var self = this;
+            self.simulateQuery = false;
+            self.isDisabled    = false;
+            
+            // list of states to be displayed
+            self.states        = loadStates();
+            self.querySearch   = querySearch;
+            self.selectedItemChange = selectedItemChange;
+            self.searchTextChange   = searchTextChange;
+            self.newState = newState;
+            
+            function newState(state) {
+               alert("This functionality is yet to be implemented!");
+            }
+            
+            function querySearch (query) {
+               var results = query ? self.states.filter( createFilterFor(query) ) :
+                  self.states, deferred;
+                  
+               if (self.simulateQuery) {
+                  deferred = $q.defer();
+                     
+                  $timeout(function () { 
+                     deferred.resolve( results ); 
+                  }, 
+                  Math.random() * 1000, false);
+                  return deferred.promise;
+               } else {
+                  return results;
+               }
+            }
+            
+            function searchTextChange(text) {
+               $log.info('Text changed to ' + text);
+            }
+            
+            function selectedItemChange(item) {
+               $log.info('Item changed to ' + JSON.stringify(item));
+            }
+            
+            //build list of states as map of key-value pairs
+            function loadStates() {
+               var allStates = 'Alabama ';
+                  
+               return allStates.split(/, +/g).map( function (state) {
+                  return {
+                     value: state.toLowerCase(),
+                     display: state
+                  };
+               });
+            }
+            
+            //filter function for search query
+            function createFilterFor(query) {
+               var lowercaseQuery = angular.lowercase(query);
+               return function filterFn(state) {
+                  return (state.value.indexOf(lowercaseQuery) === 0);
+               };
+            }
+         }  
+      </script>      
 </head>
-<body class="content">
+<body class="content" ng-app = "firstApplication" ng-cloak>
 	<nav class="navbar navbar-inverse">
 		<div class="container-fluid">
 			<div class="navbar-header">
@@ -26,21 +100,43 @@
 			</div>
 			<ul class="nav navbar-nav">
 				<li class="active"><a href="#">Home</a></li>
-				<li><a href="#">Projects</a></li>
+				<li><a href="#">Projects</a></li>0
 				<li><a href="#">Team</a></li>
 				<li><a href="#">About Us</a></li>
 				<li><a href="#">Contact Us</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				<form class="navbar-form navbar-left">
-					<div class="input-group">
-						<input type="text" class="form-control" placeholder="Search">
-						<div class="input-group-btn">
-							<button class="btn btn-default" type="submit">
-								<i class="glyphicon glyphicon-search"></i>
-							</button>
-						</div>
-					</div>
+					
+<div ng-controller = "autoCompleteController as ctrl" layout = "column" ng-cloak>
+         <md-content class = "md-padding">
+            <form ng-submit = "$event.preventDefault()">
+            <md-autocomplete
+                  ng-disabled = "ctrl.isDisabled"
+                  md-no-cache = "ctrl.noCache"
+                  md-selected-item = "ctrl.selectedItem"
+                  md-search-text-change = "ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text = "ctrl.searchText"
+                  md-selected-item-change = "ctrl.selectedItemChange(item)"
+                  md-items = "item in ctrl.querySearch(ctrl.searchText)"
+                  md-item-text = "item.display"
+                  md-min-length = "0"
+                  placeholder = "Search">
+                  
+                  <md-item-template>
+                     <span md-highlight-text = "ctrl.searchText"
+                        md-highlight-flags = "^i">{{item.display}}</span>
+                  </md-item-template>
+                  
+                  <md-not-found>
+                     No Result Matching "{{ctrl.searchText}}" were found.
+                     <a ng-click = "ctrl.newState(ctrl.searchText)">Create a new one!</a>
+                  </md-not-found>
+               </md-autocomplete>
+               <br/>
+            </form>
+         </md-content>
+      </div>
 				</form>
 
 				<li><a href="#"><span class="glyphicon glyphicon-user"></span>
@@ -50,6 +146,7 @@
 			</ul>
 		</div>
 	</nav>
+	
 </body>
 <script>
   $(".content").floatingSocialShare({
@@ -65,9 +162,3 @@
   });
 </script>
 </html>
-
-
-
-
-
-
